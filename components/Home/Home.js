@@ -24,7 +24,7 @@ const Home = () => {
     const isUserLogin = async () => {
       const isUserActive = await AsyncStorage.getItem('LOGIN_USER');
       if (isUserActive) {
-        navigation.navigate('WelcomePage');
+        navigation.navigate('Home');
       } else {
         navigation.navigate('Login');
       }

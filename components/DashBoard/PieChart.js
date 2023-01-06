@@ -61,8 +61,14 @@ const ChartJs = () => {
             setStudentStrenght(data1.data);
           }),
         )
-        .catch(err => {
-          console.log(err);
+        .catch(async err => {
+          if (err.response.status == 401) {
+            const isUserLogin = JSON.stringify('token has expired');
+            await AsyncStorage.setItem('IS_TOKEN', isUserLogin);
+            navigation.navigate('Login');
+          } else {
+            alert(err);
+          }
         });
     };
     getData();

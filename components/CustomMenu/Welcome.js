@@ -19,7 +19,7 @@ const IconBox = styled.View`
   margin-vertical: 10px;
 `;
 const View = styled.View``;
-const WelcomePage = () => {
+const Home = () => {
   const {colors} = useTheme();
 
   const Text = styled.Text`
@@ -66,10 +66,11 @@ const WelcomePage = () => {
       .then(res => {
         setName(res.data.guardian.guardian.name);
       })
-      .catch(err => {
+      .catch(async err => {
         if (err.response.status == 401) {
+          const isUserLogin = JSON.stringify('token has expired');
+          await AsyncStorage.setItem('IS_TOKEN', isUserLogin);
           navigation.navigate('Login');
-          alert('Token has expired');
         } else {
           alert(err);
         }
@@ -87,10 +88,11 @@ const WelcomePage = () => {
       .then(res => {
         setName(res.data.staff.firstname);
       })
-      .catch(err => {
+      .catch(async err => {
         if (err.response.status == 401) {
+          const isUserLogin = JSON.stringify('token has expired');
+          await AsyncStorage.setItem('IS_TOKEN', isUserLogin);
           navigation.navigate('Login');
-          alert('Token has expired');
         } else {
           alert(err);
         }
@@ -108,10 +110,11 @@ const WelcomePage = () => {
       .then(res => {
         setName(res.data.student.stdName);
       })
-      .catch(err => {
+      .catch(async err => {
         if (err.response.status == 401) {
+          const isUserLogin = JSON.stringify('token has expired');
+          await AsyncStorage.setItem('IS_TOKEN', isUserLogin);
           navigation.navigate('Login');
-          alert('Token has expired');
         } else {
           alert(err);
         }
@@ -127,7 +130,6 @@ const WelcomePage = () => {
         setRole(jsonVal.user.role);
         setState(true);
       } else {
-        alert('token has expired!');
         navigation.navigate('Login');
       }
     };
@@ -322,4 +324,4 @@ const WelcomePage = () => {
   );
 };
 
-export default WelcomePage;
+export default Home;

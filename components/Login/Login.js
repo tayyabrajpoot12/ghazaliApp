@@ -2,11 +2,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation, useTheme} from '@react-navigation/native';
 import axios from 'axios';
 import React, {useState, useEffect} from 'react';
-import {ActivityIndicator, ScrollView} from 'react-native';
+import {
+  ActivityIndicator,
+  ScrollView,
+  BackHandler,
+  Alert,
+  Touchable,
+  TouchableOpacity,
+} from 'react-native';
 import {Button as MyButton, Snackbar, Text} from 'react-native-paper';
 import styled from 'styled-components/native';
 import {useNetInfo, NetInfo} from '@react-native-community/netinfo';
 import Icon from 'react-native-vector-icons/Feather';
+import Loader from '../Loader';
 const Input = styled.TextInput`
   border-color: #fff;
   border-width: 1px;
@@ -45,11 +53,33 @@ const Login = () => {
   const onDismissSnackBar = () => setVisible(false);
 
   const [data, setData] = useState({
-    email: '',
-    password: '',
+    email: 'gfng-8@ghazalians.com',
+    password: '6sl7a1q2',
   });
-
+  const navigation = useNavigation();
   const netInfo = useNetInfo();
+  const route = navigation.current?.getCurrentRoute();
+
+  React.useEffect(() => {
+    const backAction = () => {
+      if (!navigation.isFocused()) {
+        return false;
+      }
+
+      Alert.alert('Hold on!', 'Are you sure you want to exit?', [
+        {text: 'Cancel'},
+        {text: 'Yes', onPress: () => BackHandler.exitApp()},
+      ]);
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, [navigation]);
 
   const userLogin = () => {
     setLoading(true);
@@ -81,12 +111,13 @@ const Login = () => {
           .then(async res => {
             const loginUser = JSON.stringify(res.data);
             await AsyncStorage.setItem('LOGIN_USER', loginUser);
+            await AsyncStorage.removeItem('IS_TOKEN');
             if (res.data.user.permissions.canSeeDashboard == true) {
               navigation.navigate('DashBoard');
               setData({...data, email: '', password: ''});
               setLoading(false);
             } else {
-              navigation.navigate('WelcomePage');
+              navigation.navigate('Home');
               setData({...data, email: '', password: ''});
               setLoading(false);
             }
@@ -120,17 +151,18 @@ const Login = () => {
     }
   };
 
-  const navigation = useNavigation();
-
   useEffect(() => {
     const isUserLogin = async () => {
       const isUserActive = await AsyncStorage.getItem('LOGIN_USER');
       const jsonVal = JSON.parse(isUserActive);
-      if (jsonVal != null) {
+      const IS_TOKEN = await AsyncStorage.getItem('IS_TOKEN');
+      const jsonToken = JSON.parse(IS_TOKEN);
+      if (jsonVal != null && jsonToken == null) {
+        console.log(jsonToken);
         if (jsonVal.user.role == 1) {
           navigation.navigate('DashBoard');
         } else if (jsonVal.user.role === 4 || 5 || 6) {
-          navigation.navigate('WelcomePage');
+          navigation.navigate('Home');
         } else {
           navigation.navigate('Login');
         }
@@ -143,6 +175,7 @@ const Login = () => {
   return (
     <>
       <View>
+        <Loader loading={loading} />
         <ScrollView
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
@@ -151,12 +184,12 @@ const Login = () => {
             style={{
               fontSize: 30,
               fontWeight: 'bold',
-              marginVertical: 10,
+              marginTop: 30,
               color: '#7568f6',
             }}>
             Login
           </Text>
-          <Text style={{marginVertical: 20}}>
+          <Text style={{marginVertical: 10}}>
             Enter your email address and password to access app features
           </Text>
           <Text style={{color: '#7568f6', marginVertical: 20}}>Email</Text>
@@ -177,24 +210,50 @@ const Login = () => {
             editable={loading ? false : true}
             value={data.password}
           />
-          <Text style={{marginVertical: 20}}>
-            Enter your email address we'll send you verification an code to
-            reset your password
+          <Text
+            style={{
+              marginVertical: 20,
+              fontWeight: 'bold',
+              alignSelf: 'flex-start',
+            }}
+            onPress={() => {
+              navigation.navigate('EmailVerificationForm');
+            }}>
+            Forget Password?
           </Text>
           <Box>
-            {loading && (
+            {/* {loading && (
               <ActivityIndicator
                 size={25}
                 style={{position: 'absolute', zIndex: 20}}
               />
-            )}
-            <MyButton
+            )} */}
+            {/* <MyButton
+                disabled={loading ? true : false}
+                style={{
+                  width: '100%',
+                  height: 45,
+                  alignSelf: 'center',
+                  alignItems: 'center',
+                  padding: 2,
+                }}
+                mode="contained"
+                onPress={userLogin}>
+                Login
+              </MyButton> */}
+            <TouchableOpacity
               disabled={loading ? true : false}
-              style={{width: '100%'}}
-              mode="contained"
+              style={{
+                width: '100%',
+                height: 45,
+                backgroundColor: colors.primary,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 30,
+              }}
               onPress={userLogin}>
-              Login
-            </MyButton>
+              <Text style={{color: '#ffffff', letterSpacing: 2}}>Login</Text>
+            </TouchableOpacity>
           </Box>
         </ScrollView>
         <Snackbar

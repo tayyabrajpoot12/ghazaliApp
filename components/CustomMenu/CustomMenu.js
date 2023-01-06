@@ -52,7 +52,7 @@ const CustomMenu = ({toggleTheme, isDarkTheme}) => {
             break;
         }
       }
-    } catch (e) { 
+    } catch (e) {
       console.log(e);
     }
   };
@@ -70,7 +70,8 @@ const CustomMenu = ({toggleTheme, isDarkTheme}) => {
 
   const LogoutUser = async () => {
     await AsyncStorage.removeItem('LOGIN_USER');
-    navigation.navigate('Login');
+    navigation.navigate('Login'); 
+    closeMenu();
   };
 
   const [image, setImage] = useState();
